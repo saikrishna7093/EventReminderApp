@@ -1,4 +1,4 @@
-package com.example.eventreminder.ui.theme
+package com.saikrishnapannela.eventreminder.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

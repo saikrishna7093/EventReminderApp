@@ -1,4 +1,4 @@
-package com.example.eventreminder
+package com.saikrishnapannela.eventreminder
 
 import android.app.Activity
 import android.content.Intent
@@ -33,7 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.eventreminder.ui.theme.EventReminderTheme
+import com.saikrishnapannela.eventreminder.ui.theme.EventReminderTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

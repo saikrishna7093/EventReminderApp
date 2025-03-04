@@ -1,12 +1,12 @@
-package com.example.eventreminder
+package com.saikrishnapannela.eventreminder
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,8 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.database.FirebaseDatabase
 
 class GetAccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -181,7 +180,45 @@ fun GetAccountScreen() {
 
             Text(
                 modifier = Modifier
+                    .clickable {
+                        when {
 
+                            fullName.isBlank() -> {
+                                Toast.makeText(context, "UserName missing", Toast.LENGTH_SHORT)
+                                    .show()
+
+                            }
+
+                            email.isBlank() -> {
+                                Toast.makeText(context, "EmailId missing", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            city.isBlank() -> {
+                                Toast.makeText(context, "city missing", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            password.isBlank() -> {
+                                Toast.makeText(context, "Password missing", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            else -> {
+
+                                val eventData = EventData(
+                                    fullName,
+                                    email,
+                                    city,
+                                    password
+
+                                )
+
+                                registerEventReminder(eventData, context)
+
+                            }
+                        }
+                    }
                     .fillMaxWidth()
                     .background(
                         color = colorResource(id = R.color.red),
@@ -232,8 +269,47 @@ fun GetAccountScreen() {
 }
 
 
+fun registerEventReminder(eventData: EventData, context: Context) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("EventReminderData")
+
+    databaseReference.child(eventData.emailId.replace(".", ","))
+        .setValue(eventData)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "You Registered Successfully", Toast.LENGTH_SHORT)
+                    .show()
+//                context.startActivity(Intent(context, CheckInActivity::class.java))
+//                (context as Activity).finish()
+
+            } else {
+                Toast.makeText(
+                    context,
+                    "Registration Failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        .addOnFailureListener { _ ->
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+}
+
+
 @Preview(showBackground = true)
 @Composable
 fun GetAccountScreenPreview() {
     GetAccountScreen()
 }
+
+data class EventData(
+    var userName : String = "",
+    var emailId : String = "",
+    var city : String = "",
+    var password: String = ""
+)

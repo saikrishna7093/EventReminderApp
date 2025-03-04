@@ -1,4 +1,4 @@
-package com.example.eventreminder
+package com.saikrishnapannela.eventreminder
 
 import org.junit.Test
 

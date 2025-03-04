@@ -1,12 +1,12 @@
-package com.example.eventreminder
+package com.saikrishnapannela.eventreminder
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -36,8 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.database.FirebaseDatabase
 
 class GetInActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,6 +143,34 @@ fun GetInScreen() {
 
             Text(
                 modifier = Modifier
+                    .clickable {
+                        when{
+
+
+                            email.isBlank() -> {
+                                Toast.makeText(context, "MailID missing", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                            password.isBlank() -> {
+                                Toast.makeText(context, "Password missing", Toast.LENGTH_SHORT)
+                                    .show()
+
+                            }
+                            else -> {
+
+                                val eventData = EventData(
+                                    "",
+                                    email,
+                                    "",
+                                    password
+
+                                )
+
+                                loginEventReminder(eventData, context)
+
+                            }
+                        }
+                    }
                     .fillMaxWidth()
                     .background(
                         color = colorResource(id = R.color.red),
@@ -193,6 +218,42 @@ fun GetInScreen() {
 
     }
 
+}
+
+fun loginEventReminder(eventData: EventData, context: Context) {
+
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("EventReminderData").child(eventData.emailId.replace(".", ","))
+
+    databaseReference.get().addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val userData = task.result?.getValue(EventData::class.java)
+            if (userData != null) {
+                if (userData.password == eventData.password) {
+                    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                    EventReminderSP.persistLoginState(context, true)
+                    EventReminderSP.persistUserMail(context, userData.emailId)
+                    EventReminderSP.persistUserName(context, userData.userName)
+                    Toast.makeText(context, "Login Sucessfully", Toast.LENGTH_SHORT).show()
+
+//                    context.startActivity(Intent(context, HomeActivity::class.java))
+//                    (context as Activity).finish()
+                } else {
+                    Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(context, "Your account not found", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+    }
 }
 
 

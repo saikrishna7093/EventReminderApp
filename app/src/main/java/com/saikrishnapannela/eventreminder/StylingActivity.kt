@@ -1,4 +1,4 @@
-package com.example.eventreminder
+package com.saikrishnapannela.eventreminder
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

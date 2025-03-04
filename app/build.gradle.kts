@@ -1,14 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.example.eventreminder"
+    namespace = "com.saikrishnapannela.eventreminder"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.eventreminder"
+        applicationId = "com.saikrishnapannela.eventreminder"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -69,4 +70,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.firebase.database.ktx)
+
 }

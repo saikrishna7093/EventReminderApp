@@ -237,8 +237,8 @@ fun loginEventReminder(eventData: EventData, context: Context) {
                     EventReminderSP.persistUserName(context, userData.userName)
                     Toast.makeText(context, "Login Sucessfully", Toast.LENGTH_SHORT).show()
 
-//                    context.startActivity(Intent(context, HomeActivity::class.java))
-//                    (context as Activity).finish()
+                    context.startActivity(Intent(context, HomeActivity::class.java))
+                    (context as Activity).finish()
                 } else {
                     Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT).show()
                 }

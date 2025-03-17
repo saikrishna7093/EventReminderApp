@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "604241531670",
-    "project_id": "eventreminder-89fac",
-    "storage_bucket": "eventreminder-89fac.firebasestorage.app"
+    "project_number": "772805907873",
+    "project_id": "eventreminder-64174",
+    "storage_bucket": "eventreminder-64174.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:604241531670:android:541a6f96099e8a2fbeb637",
+        "mobilesdk_app_id": "1:772805907873:android:68379624938899860a67e0",
         "android_client_info": {
           "package_name": "com.saikrishnapannela.eventreminder"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCYSU7NCpsX9MnzS3YxfEi_0nLcoNcY5ig"
+          "current_key": "AIzaSyAXPNzQvlKwI-CPpsZpcdgRFGXrvDXqTxM"
         }
       ],
       "services": {

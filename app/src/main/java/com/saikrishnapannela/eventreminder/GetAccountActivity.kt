@@ -184,23 +184,23 @@ fun GetAccountScreen() {
                         when {
 
                             fullName.isBlank() -> {
-                                Toast.makeText(context, "UserName missing", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, "We Need FullName", Toast.LENGTH_SHORT)
                                     .show()
 
                             }
 
                             email.isBlank() -> {
-                                Toast.makeText(context, "EmailId missing", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, "We Need EmailId", Toast.LENGTH_SHORT)
                                     .show()
                             }
 
                             city.isBlank() -> {
-                                Toast.makeText(context, "city missing", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, "We Need City", Toast.LENGTH_SHORT)
                                     .show()
                             }
 
                             password.isBlank() -> {
-                                Toast.makeText(context, "Password missing", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, "We Need Password", Toast.LENGTH_SHORT)
                                     .show()
                             }
 
@@ -280,8 +280,8 @@ fun registerEventReminder(eventData: EventData, context: Context) {
             if (task.isSuccessful) {
                 Toast.makeText(context, "You Registered Successfully", Toast.LENGTH_SHORT)
                     .show()
-//                context.startActivity(Intent(context, CheckInActivity::class.java))
-//                (context as Activity).finish()
+                context.startActivity(Intent(context, GetInActivity::class.java))
+                (context as Activity).finish()
 
             } else {
                 Toast.makeText(

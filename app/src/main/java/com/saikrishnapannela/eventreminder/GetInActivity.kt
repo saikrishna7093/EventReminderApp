@@ -148,11 +148,11 @@ fun GetInScreen() {
 
 
                             email.isBlank() -> {
-                                Toast.makeText(context, "MailID missing", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, "We Need EmailId", Toast.LENGTH_SHORT)
                                     .show()
                             }
                             password.isBlank() -> {
-                                Toast.makeText(context, "Password missing", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, "We Need Password", Toast.LENGTH_SHORT)
                                     .show()
 
                             }
@@ -163,7 +163,6 @@ fun GetInScreen() {
                                     email,
                                     "",
                                     password
-
                                 )
 
                                 loginEventReminder(eventData, context)
@@ -232,9 +231,9 @@ fun loginEventReminder(eventData: EventData, context: Context) {
             if (userData != null) {
                 if (userData.password == eventData.password) {
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    EventReminderSP.persistLoginState(context, true)
-                    EventReminderSP.persistUserMail(context, userData.emailId)
-                    EventReminderSP.persistUserName(context, userData.userName)
+                    EventReminderAppData.persistLoginState(context, true)
+                    EventReminderAppData.persistUserMail(context, userData.emailId)
+                    EventReminderAppData.persistUserName(context, userData.userName)
                     Toast.makeText(context, "Login Sucessfully", Toast.LENGTH_SHORT).show()
 
                     context.startActivity(Intent(context, HomeActivity::class.java))

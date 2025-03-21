@@ -13,6 +13,12 @@
         android:theme="@style/Theme.EventReminder"
         tools:targetApi="31">
         <activity
+            android:name=".CategoriseEventsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UpcomingEventsActivity"
+            android:exported="false" />
+        <activity
             android:name=".AddEventActivity"
             android:exported="false" />
         <activity

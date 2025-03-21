@@ -101,14 +101,15 @@ fun HomeActivityScreen() {
                             shape = RoundedCornerShape(6.dp)
                         )
                         .padding(horizontal = 0.dp, vertical = 12.dp)
-
-
+                        .clickable {
+                            context.startActivity(Intent(context, UpcomingEventsActivity::class.java))
+                        }
                 ) {
                     Image(
                         modifier = Modifier
                             .size(100.dp)
                             .align(Alignment.CenterHorizontally),
-                        painter = painterResource(id = R.drawable.reminder),
+                        painter = painterResource(id = R.drawable.upcoming_event),
                         contentDescription = "Reminder Icon"
                     )
 
@@ -139,13 +140,16 @@ fun HomeActivityScreen() {
                             shape = RoundedCornerShape(6.dp)
                         )
                         .padding(horizontal = 0.dp, vertical = 12.dp)
+                        .clickable {
+                            context.startActivity(Intent(context, CategoriseEventsActivity::class.java))
 
+                        }
                 ) {
                     Image(
                         modifier = Modifier
                             .size(100.dp)
                             .align(Alignment.CenterHorizontally),
-                        painter = painterResource(id = R.drawable.reminder),
+                        painter = painterResource(id = R.drawable.categories_event),
                         contentDescription = "Reminder Icon"
                     )
 
@@ -192,7 +196,7 @@ fun HomeActivityScreen() {
                         modifier = Modifier
                             .size(100.dp)
                             .align(Alignment.CenterHorizontally),
-                        painter = painterResource(id = R.drawable.reminder),
+                        painter = painterResource(id = R.drawable.add_event),
                         contentDescription = "Reminder Icon"
                     )
 
@@ -229,7 +233,7 @@ fun HomeActivityScreen() {
                         modifier = Modifier
                             .size(100.dp)
                             .align(Alignment.CenterHorizontally),
-                        painter = painterResource(id = R.drawable.reminder),
+                        painter = painterResource(id = R.drawable.user_profile),
                         contentDescription = "Reminder Icon"
                     )
 

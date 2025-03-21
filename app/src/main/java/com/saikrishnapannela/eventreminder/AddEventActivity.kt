@@ -5,7 +5,6 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Bundle
-import android.text.TextUtils.replace
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,13 +25,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +66,28 @@ class AddEventActivity : ComponentActivity() {
 @Composable
 fun AddEventActivityScreen() {
 
+    val categories = mapOf(
+        "Personal Life" to listOf("Workout", "Yoga", "Reading", "Birthday", "Gaming"),
+        "Work & Productivity" to listOf("Meeting", "Project Deadline", "Online Course"),
+        "Finance & Budgeting" to listOf("Salary", "Bills", "Investments"),
+        "Errands & Tasks" to listOf("Groceries", "Doctor Appointment", "Home Cleaning"),
+        "Goals & Productivity" to listOf("Daily Routine", "Savings Target", "Skill Learning"),
+        "Travel & Adventure" to listOf("Weekend Trip", "Flight Booking", "New Restaurant"),
+        "Digital & Online Activities" to listOf(
+            "Social Media Post",
+            "Online Shopping",
+            "App Updates"
+        )
+    )
+
+
+
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var selectedEvent by remember { mutableStateOf<String?>(null) }
+    var expandedCategory by remember { mutableStateOf(false) }
+    var expandedEvent by remember { mutableStateOf(false) }
+
+
     var eventName by remember { mutableStateOf("") }
     var eventDescription by remember { mutableStateOf("") }
     var eventCategory by remember { mutableStateOf("") }
@@ -80,7 +103,7 @@ fun AddEventActivityScreen() {
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
-            dateState= String.format("%02d/%02d/%d", dayOfMonth, month + 1, year)
+            dateState = String.format("%02d/%02d/%d", dayOfMonth, month + 1, year)
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
@@ -154,7 +177,7 @@ fun AddEventActivityScreen() {
 
             Text(
                 modifier = Modifier,
-                text = "Event Name",
+                text = "Event Title",
                 style = MaterialTheme.typography.titleMedium.copy(
                     color = Color.Red,
                 )
@@ -187,20 +210,93 @@ fun AddEventActivityScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                modifier = Modifier,
-                text = "Event Category",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    color = Color.Red,
-                )
-            )
+//            Text(
+//                modifier = Modifier,
+//                text = "Event Category",
+//                style = MaterialTheme.typography.titleMedium.copy(
+//                    color = Color.Red,
+//                )
+//            )
+//
+//            Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(
+//            OutlinedTextField(
+//                modifier = Modifier
+//                    .fillMaxWidth(),
+//                value = eventCategory,
+//                onValueChange = { eventCategory = it }
+//            )
+
+            //event Category DropDown
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                value = eventCategory,
-                onValueChange = { eventCategory = it }
-            )
+                    .fillMaxWidth()
+            ) {
+                // Event Category Dropdown
+                Text(
+                    "Select Event Category", style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.Red,
+                    )
+                )
+                Box {
+                    OutlinedTextField(
+                        value = selectedCategory ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Dropdown Icon",
+                                Modifier.clickable { expandedCategory = true })
+                        }
+                    )
+                    DropdownMenu(
+                        expanded = expandedCategory,
+                        onDismissRequest = { expandedCategory = false }) {
+                        categories.keys.forEach { category ->
+                            DropdownMenuItem(text = { Text(category) }, onClick = {
+                                selectedCategory = category
+                                selectedEvent = null // Reset event selection when category changes
+                                expandedCategory = false
+                            })
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Event Name Dropdown (Based on selected category)
+                Text(
+                    "Select Event Name", style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.Red,
+                    )
+                )
+                Box {
+                    OutlinedTextField(
+                        value = selectedEvent ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Dropdown Icon",
+                                Modifier.clickable { expandedEvent = true })
+                        }
+                    )
+                    DropdownMenu(
+                        expanded = expandedEvent,
+                        onDismissRequest = { expandedEvent = false }) {
+                        categories[selectedCategory]?.forEach { event ->
+                            DropdownMenuItem(text = { Text(event) }, onClick = {
+                                selectedEvent = event
+                                expandedEvent = false
+                            })
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -226,7 +322,7 @@ fun AddEventActivityScreen() {
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
-                        text = dateState.ifEmpty { "Select Event Date" },
+                        text = dateState.ifEmpty { "Event Date" },
                         color = if (dateState.isEmpty()) Color.Gray else Color.Black
                     )
                     Icon(
@@ -257,7 +353,7 @@ fun AddEventActivityScreen() {
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
-                        text = timeState.ifEmpty { "Select Event Time" },
+                        text = timeState.ifEmpty { "Event Time" },
                         color = if (timeState.isEmpty()) Color.Gray else Color.Black
                     )
                     Icon(
@@ -284,13 +380,14 @@ fun AddEventActivityScreen() {
                         val addEventData = AddEventData(
                             eventName,
                             eventDescription,
-                            eventCategory,
-                            dateState.toString(),
-                            timeState.toString()
+                            selectedCategory!!,
+                            selectedEvent!!,
+                            dateState,
+                            timeState
                         )
-                        AddEvent(addEventData,context)
+                        AddEvent(addEventData, context)
 
-                        Toast.makeText(context, "Adding Event", Toast.LENGTH_SHORT).show()
+
                     }
                     .background(
                         color = colorResource(id = R.color.red),
@@ -313,108 +410,6 @@ fun AddEventActivityScreen() {
     }
 }
 
-//@Composable
-//fun DateTimePickerRow(dateState: String,timeState: String) {
-//    val context = LocalContext.current
-//    val calendar = Calendar.getInstance()
-//
-//    // State for date and time
-////    val dateState = remember { mutableStateOf("") }
-////    val timeState = remember { mutableStateOf("") }
-//
-//    // Open Date Picker
-//    val datePickerDialog = DatePickerDialog(
-//        context,
-//        { _, year, month, dayOfMonth ->
-//            dateState= String.format("%02d/%02d/%d", dayOfMonth, month + 1, year)
-//        },
-//        calendar.get(Calendar.YEAR),
-//        calendar.get(Calendar.MONTH),
-//        calendar.get(Calendar.DAY_OF_MONTH)
-//    )
-//
-//    // Open Time Picker
-//    val timePickerDialog = TimePickerDialog(
-//        context,
-//        { _, hourOfDay, minute ->
-//            timeState.value = String.format("%02d:%02d", hourOfDay, minute)
-//        },
-//        calendar.get(Calendar.HOUR_OF_DAY),
-//        calendar.get(Calendar.MINUTE),
-//        false
-//    )
-//
-//    Row(
-//        modifier = Modifier
-//            .fillMaxWidth(),
-//        horizontalArrangement = Arrangement.SpaceBetween,
-//        verticalAlignment = Alignment.CenterVertically
-//    ) {
-//        OutlinedTextField(
-//            value = dateState.value,
-//            onValueChange = {},
-//            label = { Text("Pick Date") },
-//            readOnly = true,
-//            modifier = Modifier
-//                .weight(1f)
-//                .clickable { datePickerDialog.show() },
-//            trailingIcon = {
-//                Icon(
-//                    imageVector = Icons.Default.DateRange,
-//                    contentDescription = "Pick Date"
-//                )
-//            }
-//        )
-//
-//        Box(
-//
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 8.dp)
-//                .height(50.dp)
-//                .clickable {
-//                    // Handle the click event, e.g., show a date picker
-//                }
-//                .background(Color.LightGray, MaterialTheme.shapes.medium)
-//                .padding(horizontal = 16.dp),
-//            contentAlignment = Alignment.CenterStart
-//        ) {
-//            Text(
-//                text = dateState.ifEmpty { "Select Expiration Date" },
-//                color = if (expirationDate.isEmpty()) Color.Gray else Color.Black
-//            )
-//            Icon(
-//                imageVector = Icons.Default.DateRange, // Replace with your desired icon
-//                contentDescription = "Calendar Icon",
-//                modifier = Modifier
-//                    .align(Alignment.CenterEnd)
-//                    .size(24.dp)
-//                    .clickable {
-//                        expirationDatePickerDialog.show()
-//                    },
-//                tint = Color.DarkGray
-//            )
-//        }
-//
-//        Spacer(modifier = Modifier.width(16.dp))
-//
-//        OutlinedTextField(
-//            value = timeState.value,
-//            onValueChange = {},
-//            label = { Text("Pick Time") },
-//            readOnly = true,
-//            modifier = Modifier
-//                .weight(1f)
-//                .clickable { timePickerDialog.show() },
-//            trailingIcon = {
-//                Icon(
-//                    imageVector = Icons.Default.DateRange,
-//                    contentDescription = "Pick Time"
-//                )
-//            }
-//        )
-//    }
-//}
 
 private fun AddEvent(eventData: AddEventData, activityContext: Context) {
 
@@ -424,10 +419,15 @@ private fun AddEvent(eventData: AddEventData, activityContext: Context) {
     val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
     val orderId = dateFormat.format(Date())
 
-    databaseRef.child(eventData.userMail.replace(".", ",")).child(orderId).setValue(eventData)
+    val userEmail = EventReminderAppData.fetchUserMail(activityContext)
+
+
+    databaseRef.child(userEmail.replace(".", ",")).child(orderId).setValue(eventData)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Toast.makeText(activityContext, "Event Added Successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activityContext, "Event Added Successfully", Toast.LENGTH_SHORT)
+                    .show()
+                (activityContext as Activity).finish()
             } else {
                 Toast.makeText(
                     activityContext,

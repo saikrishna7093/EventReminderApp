@@ -3,7 +3,7 @@ package com.saikrishnapannela.eventreminder
 import android.content.Context
 
 
-object EventReminderSP {
+object EventReminderAppData {
 
     fun persistLoginState(context: Context, value: Boolean) {
         val userLogin = context.getSharedPreferences("USER_DETAILS", Context.MODE_PRIVATE)

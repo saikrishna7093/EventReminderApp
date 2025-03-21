@@ -45,7 +45,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
                 EventLaunch()
-
         }
     }
 }
@@ -68,10 +67,23 @@ fun EventLaunch() {
         EventEntry()
 
     } else {
+        checkStatusAndNavigate(context)
+    }
+
+}
+
+fun checkStatusAndNavigate(context: Activity)
+{
+    val currentStatus = EventReminderAppData.fetchLoginState(context)
+
+    if(currentStatus)
+    {
+        context.startActivity(Intent(context, HomeActivity::class.java))
+        context.finish()
+    }else{
         context.startActivity(Intent(context, GetInActivity::class.java))
         context.finish()
     }
-
 }
 
 @Composable

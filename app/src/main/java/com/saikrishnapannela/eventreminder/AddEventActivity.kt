@@ -4,7 +4,10 @@ import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -35,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,16 +53,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 class AddEventActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    )
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                        100
+                    )
+                }
+            }
+
             AddEventActivityScreen()
         }
     }
@@ -81,7 +105,6 @@ fun AddEventActivityScreen() {
     )
 
 
-
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedEvent by remember { mutableStateOf<String?>(null) }
     var expandedCategory by remember { mutableStateOf(false) }
@@ -97,12 +120,28 @@ fun AddEventActivityScreen() {
 
     val context = LocalContext.current as Activity
 
-    val activityActivity = LocalContext.current
     val calendar = Calendar.getInstance()
+
+
+    var selYear by remember { mutableIntStateOf(0) }
+    var selMonth by remember { mutableIntStateOf(0) }
+    var selDOM by remember { mutableIntStateOf(0) }
+    var selHOD by remember { mutableIntStateOf(0) }
+    var selMinute by remember { mutableIntStateOf(0) }
+
+    var isChecked by remember { mutableStateOf(false) }
+
 
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
+            selYear = year
+            selMonth = month
+            selDOM = dayOfMonth
+
+
+            Log.e("Test", "Y - $year , M - ${month + 1} , DOM - $dayOfMonth")
+
             dateState = String.format("%02d/%02d/%d", dayOfMonth, month + 1, year)
         },
         calendar.get(Calendar.YEAR),
@@ -114,6 +153,14 @@ fun AddEventActivityScreen() {
     val timePickerDialog = TimePickerDialog(
         context,
         { _, hourOfDay, minute ->
+
+            selHOD = hourOfDay
+            selMinute = minute
+
+
+
+            Log.e("Test", "HOD - $hourOfDay , Minute - $minute")
+
             timeState = String.format("%02d:%02d", hourOfDay, minute)
         },
         calendar.get(Calendar.HOUR_OF_DAY),
@@ -371,6 +418,24 @@ fun AddEventActivityScreen() {
 
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Checkbox(
+                    checked = isChecked,
+                    onCheckedChange = { isChecked = it },
+                )
+                Text(
+                    text = "Notify me about this event",
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+
+            }
+
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
@@ -385,8 +450,42 @@ fun AddEventActivityScreen() {
                             dateState,
                             timeState
                         )
-                        AddEvent(addEventData, context)
 
+
+                        val testCalendar = Calendar
+                            .getInstance()
+                            .apply {
+                                set(Calendar.YEAR, selYear)
+                                set(Calendar.MONTH, selMonth)
+                                set(Calendar.DAY_OF_MONTH, selDOM)
+                                set(Calendar.HOUR_OF_DAY, selHOD)
+                                set(Calendar.MINUTE, selMinute)
+                                set(Calendar.SECOND, 0)
+                            }
+
+                        if (testCalendar.timeInMillis > System.currentTimeMillis()) {
+
+                            if (isChecked)
+                                scheduleNotification(
+                                    context,
+                                    testCalendar.timeInMillis,
+                                    eventName,
+                                    eventDescription
+                                )
+
+
+
+                            AddEvent(addEventData, context)
+
+                        } else {
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Please select a future date and time",
+                                    Toast.LENGTH_LONG
+                                )
+                                .show()
+                        }
 
                     }
                     .background(
@@ -417,12 +516,13 @@ private fun AddEvent(eventData: AddEventData, activityContext: Context) {
     val databaseRef = fireDB.getReference("MyEvents")
 
     val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-    val orderId = dateFormat.format(Date())
+    val eventId = dateFormat.format(Date())
+    eventData.eventId = eventId
 
     val userEmail = EventReminderAppData.fetchUserMail(activityContext)
 
 
-    databaseRef.child(userEmail.replace(".", ",")).child(orderId).setValue(eventData)
+    databaseRef.child(userEmail.replace(".", ",")).child(eventId).setValue(eventData)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(activityContext, "Event Added Successfully", Toast.LENGTH_SHORT)
@@ -450,4 +550,22 @@ private fun AddEvent(eventData: AddEventData, activityContext: Context) {
 @Composable
 fun AddEventActivityScreenPreview() {
     AddEventActivityScreen()
+}
+
+
+fun convertMillisToDateTime(millis: Long): String {
+    val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+    sdf.timeZone = TimeZone.getDefault() // Ensure it matches your system timezone
+    return sdf.format(Date(millis))
+}
+
+fun scheduleNotification(context: Context, timeInMillis: Long, title: String, message: String) {
+    NotificationScheduler.scheduleNotification(
+        context = context,
+        title = title,
+        message = message,
+        timeInMillis = timeInMillis
+    )
+//    Toast.makeText(context, "Notification Scheduled", Toast.LENGTH_LONG).show()
+
 }

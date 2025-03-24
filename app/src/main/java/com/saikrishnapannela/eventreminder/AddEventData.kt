@@ -9,5 +9,7 @@ data class AddEventData(
     var eventName: String = "",
     var date: String = "",
     var time: String = "",
-    var userMail: String = "dummy@gmail.com"
+    var userMail: String = "dummy@gmail.com",
+    var result : String = "Not Marked",
+    var eventId: String = "",
 )

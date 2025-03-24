@@ -141,12 +141,14 @@ fun CategoriseEventsActivityScreen() {
                     FilterChip(
                         selected = selectedCategory == categories[category],
                         onClick = {
-                            selectedCategory = if (selectedCategory == categories[category]) null else categories[category]
-                            filteredEvents = if (selectedCategory == null || selectedCategory == "All") {
-                                upcomingEvents
-                            } else {
-                                upcomingEvents.filter { it.category == selectedCategory }
-                            }
+                            selectedCategory =
+                                if (selectedCategory == categories[category]) null else categories[category]
+                            filteredEvents =
+                                if (selectedCategory == null || selectedCategory == "All") {
+                                    upcomingEvents
+                                } else {
+                                    upcomingEvents.filter { it.category == selectedCategory }
+                                }
                         },
                         label = {
                             Text(text = categories[category])
@@ -159,98 +161,21 @@ fun CategoriseEventsActivityScreen() {
                 }
             }
 
-            LazyColumn {
-                items(filteredEvents.size) { index ->
-                    ShowEventItem(filteredEvents[index])
-                    Spacer(modifier = Modifier.height(8.dp))
+            if(isLoading) {
+                Text(modifier = Modifier.fillMaxSize(), text = "Loading...")
+            }else{
+
+                if(filteredEvents.isNotEmpty()) {
+                    LazyColumn {
+                        items(filteredEvents.size) { index ->
+                            ShowEventItem(filteredEvents[index])
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }else{
+                    showEmptyContent()
                 }
             }
         }
     }
-}
-
-
-
-@Composable
-fun CategoriseEventsActivityScreenOld() {
-    val context = LocalContext.current as Activity
-
-    val userEmail = EventReminderAppData.fetchUserMail(context)
-
-    var upcomingEvents by remember { mutableStateOf(listOf<AddEventData>()) }
-    var isLoading by remember { mutableStateOf(true) }
-
-    LaunchedEffect(userEmail) {
-        getUpcomingEvents(userEmail) { orders ->
-            upcomingEvents = orders
-            isLoading = false
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Red)
-    ) {
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Image(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clickable {
-                        context.finish()
-                    },
-                painter = painterResource(id = R.drawable.baseline_arrow_circle_left_36),
-                contentDescription = "Reminder Icon"
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(
-                modifier = Modifier
-                    .padding(12.dp),
-                text = "Upcoming Events",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp)
-                .background(
-                    color = colorResource(id = R.color.white),
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    color = colorResource(id = R.color.white),
-                    shape = RoundedCornerShape(6.dp)
-                )
-                .padding(16.dp)
-        ) {
-
-
-            LazyColumn {
-                items(upcomingEvents.size) { bookedEvent ->
-                        ShowEventItem(upcomingEvents[bookedEvent])
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                }
-            }
-        }
-
-    }
-
 }

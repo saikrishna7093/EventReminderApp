@@ -3,10 +3,9 @@ package com.saikrishnapannela.eventreminder
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,8 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,7 +99,12 @@ fun HomeActivityScreen() {
                         )
                         .padding(horizontal = 0.dp, vertical = 12.dp)
                         .clickable {
-                            context.startActivity(Intent(context, UpcomingEventsActivity::class.java))
+                            context.startActivity(
+                                Intent(
+                                    context,
+                                    UpcomingEventsActivity::class.java
+                                )
+                            )
                         }
                 ) {
                     Image(
@@ -141,7 +143,12 @@ fun HomeActivityScreen() {
                         )
                         .padding(horizontal = 0.dp, vertical = 12.dp)
                         .clickable {
-                            context.startActivity(Intent(context, CategoriseEventsActivity::class.java))
+                            context.startActivity(
+                                Intent(
+                                    context,
+                                    CategoriseEventsActivity::class.java
+                                )
+                            )
 
                         }
                 ) {
@@ -219,6 +226,9 @@ fun HomeActivityScreen() {
 
                 Column(
                     modifier = Modifier
+                        .clickable {
+                            context.startActivity(Intent(context, ProfileActivity::class.java))
+                        }
                         .weight(1f)
                         .wrapContentHeight()
                         .border(
@@ -253,6 +263,38 @@ fun HomeActivityScreen() {
                 }
 
             }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        EventReminderAppData.persistLoginState(context,false)
+                        context.startActivity(Intent(context, GetInActivity::class.java))
+                        context.finish()
+
+                        Toast.makeText(context, "Logout Successfully", Toast.LENGTH_SHORT).show()
+
+                    }
+                    .background(
+                        color = colorResource(id = R.color.red),
+                        shape = RoundedCornerShape(6.dp)
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = colorResource(id = R.color.red),
+                        shape = RoundedCornerShape(6.dp)
+                    )
+                    .padding(vertical = 6.dp)
+                    .align(Alignment.CenterHorizontally),
+                text = "Logout",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            )
 
         }
 

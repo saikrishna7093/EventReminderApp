@@ -1,21 +1,29 @@
 package com.saikrishnapannela.eventreminder
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -30,11 +38,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.database.FirebaseDatabase
+import java.io.File
 
 class GetAccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,12 +116,16 @@ fun GetAccountScreen() {
             Text(
                 modifier = Modifier,
                 text = "Continue to register",
-                style = MaterialTheme.typography.titleLarge.copy(
+                style = MaterialTheme.typography.titleMedium.copy(
                     color = Color.Red,
                 )
             )
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            CaptureProfilePhoto()
+
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 modifier = Modifier,
@@ -313,3 +330,84 @@ data class EventData(
     var city : String = "",
     var password: String = ""
 )
+
+
+@Composable
+fun CaptureProfilePhoto() {
+    val activityContext = LocalContext.current
+
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val captureImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) {
+                imageUri = getImageUri(activityContext)
+                SelectedImage.selImageUri = imageUri as Uri
+
+//                Toast.makeText(activityContext, "Image Captured", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(activityContext, "Capture Failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                Toast.makeText(activityContext, "Permission Granted", Toast.LENGTH_SHORT).show()
+                captureImageLauncher.launch(getImageUri(activityContext)) // Launch the camera
+            } else {
+                Toast.makeText(activityContext, "Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = if (imageUri != null) {
+                rememberAsyncImagePainter(model = imageUri)
+            } else {
+                painterResource(id = R.drawable.iv_add_photo)
+            },
+            contentDescription = "Profile Image",
+            modifier = Modifier
+                .width(60.dp)
+                .height(60.dp)
+                .clickable {
+                    if (ContextCompat.checkSelfPermission(
+                            activityContext,
+                            Manifest.permission.CAMERA
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        captureImageLauncher.launch(getImageUri(activityContext))
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        if (imageUri == null) {
+            Text(text = "Tap the image to capture")
+        }
+    }
+}
+
+fun getImageUri(activityContext: Context): Uri {
+    val file = File(activityContext.filesDir, "captured_image.jpg")
+    return FileProvider.getUriForFile(
+        activityContext,
+        "${activityContext.packageName}.fileprovider",
+        file
+    )
+}
+
+
+object SelectedImage {
+    lateinit var selImageUri: Uri
+}

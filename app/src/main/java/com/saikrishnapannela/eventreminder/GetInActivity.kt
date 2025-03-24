@@ -234,7 +234,7 @@ fun loginEventReminder(eventData: EventData, context: Context) {
                     EventReminderAppData.persistLoginState(context, true)
                     EventReminderAppData.persistUserMail(context, userData.emailId)
                     EventReminderAppData.persistUserName(context, userData.userName)
-                    Toast.makeText(context, "Login Sucessfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Login Successfully", Toast.LENGTH_SHORT).show()
 
                     context.startActivity(Intent(context, HomeActivity::class.java))
                     (context as Activity).finish()

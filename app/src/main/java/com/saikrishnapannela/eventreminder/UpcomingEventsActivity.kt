@@ -1,7 +1,10 @@
 package com.saikrishnapannela.eventreminder
 
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +37,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -122,15 +128,27 @@ fun UpcomingEventsActivityScreen() {
         ) {
 
 
-            LazyColumn {
-                items(upcomingEvents.size) { bookedEvent ->
+            if (isLoading) {
+                Text(modifier = Modifier.fillMaxSize(), text = "Loading...")
+            } else {
 
-                    val eventStatusValue = isTodayOrFuture(upcomingEvents[bookedEvent].date)
+                if(upcomingEvents.isNotEmpty()) {
+                    LazyColumn {
+                        items(upcomingEvents.size) { bookedEvent ->
 
-                    if (eventStatusValue) {
-                        ShowEventItem(upcomingEvents[bookedEvent])
-                        Spacer(modifier = Modifier.height(8.dp))
+                            val eventStatusValue = isTodayOrFuture(
+                                upcomingEvents[bookedEvent].date,
+                                upcomingEvents[bookedEvent].time
+                            )
+
+                            if (eventStatusValue) {
+                                ShowEventItem(upcomingEvents[bookedEvent])
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
                     }
+                }else{
+                    showEmptyContent()
                 }
             }
         }
@@ -141,6 +159,9 @@ fun UpcomingEventsActivityScreen() {
 
 @Composable
 fun ShowEventItem(eventData: AddEventData) {
+
+    val context = LocalContext.current as Activity
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -331,6 +352,9 @@ fun ShowEventItem(eventData: AddEventData) {
 
         Spacer(modifier = Modifier.height(6.dp))
 
+        val eventStatusValue = isTodayOrFuture(eventData.date, eventData.time)
+        var eventStatus = ""
+
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -350,10 +374,6 @@ fun ShowEventItem(eventData: AddEventData) {
                 )
             )
 
-            val eventStatusValue = isTodayOrFuture(eventData.date)
-
-            var eventStatus = ""
-
             if (eventStatusValue) {
                 eventStatus = "UpComing"
             } else {
@@ -369,27 +389,139 @@ fun ShowEventItem(eventData: AddEventData) {
             )
         }
 
+        if (eventData.result != "Not Marked") {
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = "Event Result",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        color = Color.Gray,
+                    )
+                )
+
+                Text(
+                    modifier = Modifier.padding(horizontal = 6.dp),
+                    text = ":",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        color = Color.Black,
+                    )
+                )
+
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = eventData.result,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        color = Color.Black,
+                    )
+                )
+            }
+        } else {
+
+            if (!eventStatusValue) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+
+
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Did you complete this work?",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = Color.Red,
+                        )
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            modifier = Modifier
+                                .clickable {
+                                    val updatedData = mapOf(
+                                        "eventTitle" to eventData.eventTitle,
+                                        "description" to eventData.description,
+                                        "category" to eventData.category,
+                                        "eventName" to eventData.eventName,
+                                        "date" to eventData.date,
+                                        "time" to eventData.time,
+                                        "userMail" to eventData.userMail,
+                                        "result" to "Work Done",
+                                        "eventId" to eventData.eventId
+                                    )
+
+                                    updateEventDetails(
+                                        eventData.eventId,
+                                        updatedData,
+                                        context = context
+                                    )
+                                },
+                            text = "Yes",
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = Color.Blue,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(
+                            modifier = Modifier
+                                .clickable {
+
+                                    val updatedData = mapOf(
+                                        "eventTitle" to eventData.eventTitle,
+                                        "description" to eventData.description,
+                                        "category" to eventData.category,
+                                        "eventName" to eventData.eventName,
+                                        "date" to eventData.date,
+                                        "time" to eventData.time,
+                                        "userMail" to eventData.userMail,
+                                        "result" to "Missed",
+                                        "eventId" to eventData.eventId
+                                    )
+
+                                    updateEventDetails(
+                                        eventData.eventId,
+                                        updatedData,
+                                        context = context
+                                    )
+                                },
+                            text = "No, I Missed",
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = Color.Blue,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                    }
+                }
+            }
+        }
+
     }
 }
 
-fun isTodayOrFuture(dateStr: String): Boolean {
-    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+fun isTodayOrFuture(dateStr: String, timeStr: String): Boolean {
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     dateFormat.isLenient = false // Ensures strict date parsing
 
     return try {
-        val inputDate = dateFormat.parse(dateStr) ?: return false
-        val today = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time
+        val inputDateTime = dateFormat.parse("$dateStr $timeStr") ?: return false
+        val currentDateTime = Calendar.getInstance().time
 
-        inputDate >= today
+        inputDateTime >= currentDateTime
     } catch (e: Exception) {
-        false // Return false if parsing fails (invalid date format)
+        false // Return false if parsing fails (invalid date or time format)
     }
 }
+
 
 fun getUpcomingEvents(userMailId: String, callback: (List<AddEventData>) -> Unit) {
 
@@ -413,4 +545,68 @@ fun getUpcomingEvents(userMailId: String, callback: (List<AddEventData>) -> Unit
             callback(emptyList())
         }
     })
+}
+
+fun updateEventDetails(eventId: String, updatedData: Map<String, Any>, context: Context) {
+
+
+    try {
+        val emailKey = EventReminderAppData.fetchUserMail(context)
+            .replace(".", ",") // Convert email for Firebase key
+
+        val path = "MyEvents/$emailKey/$eventId"
+        Log.e("Test", "Patch Called : $path")
+        val databaseReference = FirebaseDatabase.getInstance().getReference(path)
+
+
+        databaseReference.updateChildren(updatedData)
+            .addOnSuccessListener {
+                Toast.makeText(
+                    context,
+                    "Event Updated Successfully",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                (context as Activity).finish()
+            }
+            .addOnFailureListener {
+                Toast.makeText(
+                    context,
+                    "Failed to update",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+    } catch (e: Exception) {
+        Log.e("Test", "Error Message : ${e.message}")
+    }
+}
+
+
+@Composable
+fun showEmptyContent() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.weight(1f))
+        Image(
+            modifier = Modifier
+                .size(200.dp),
+            painter = painterResource(id = R.drawable.empty_event),
+            contentDescription = "Empty Event"
+        )
+
+        Text(
+            modifier = Modifier
+                .padding(12.dp),
+            text = "No Events",
+            style = MaterialTheme.typography.headlineLarge.copy(
+                color = Color.Red,
+                fontWeight = FontWeight.Bold
+            )
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+    }
 }

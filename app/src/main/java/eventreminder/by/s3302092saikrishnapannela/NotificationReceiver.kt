@@ -1,4 +1,4 @@
-package com.saikrishnapannela.eventreminder
+package eventreminder.by.s3302092saikrishnapannela
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

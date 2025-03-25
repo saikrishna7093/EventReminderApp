@@ -1,4 +1,4 @@
-package com.saikrishnapannela.eventreminder.ui.theme
+package eventreminder.by.s3302092saikrishnapannela.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

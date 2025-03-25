@@ -1,4 +1,4 @@
-package com.saikrishnapannela.eventreminder
+package eventreminder.by.s3302092saikrishnapannela
 
 import android.app.Activity
 import android.content.Intent
@@ -270,7 +270,7 @@ fun HomeActivityScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        EventReminderAppData.persistLoginState(context,false)
+                        EventReminderAppData.writeLS(context, false)
                         context.startActivity(Intent(context, GetInActivity::class.java))
                         context.finish()
 

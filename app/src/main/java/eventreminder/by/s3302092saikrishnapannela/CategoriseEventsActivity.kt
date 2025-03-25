@@ -1,6 +1,8 @@
-package com.saikrishnapannela.eventreminder
+package eventreminder.by.s3302092saikrishnapannela
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -52,7 +54,7 @@ class CategoriseEventsActivity : ComponentActivity() {
 fun CategoriseEventsActivityScreen() {
     val context = LocalContext.current as Activity
 
-    val userEmail = EventReminderAppData.fetchUserMail(context)
+    val userEmail = EventReminderAppData.readMail(context)
 
     var upcomingEvents by remember { mutableStateOf(listOf<AddEventData>()) }
     var filteredEvents by remember { mutableStateOf(listOf<AddEventData>()) }
@@ -128,8 +130,6 @@ fun CategoriseEventsActivityScreen() {
                 )
                 .padding(16.dp)
         ) {
-            // Extract unique categories from events
-//            val categories = ce
 
             LazyRow(
                 modifier = Modifier
@@ -173,9 +173,20 @@ fun CategoriseEventsActivityScreen() {
                         }
                     }
                 }else{
-                    showEmptyContent()
+                    ShowEmptyContent()
                 }
             }
         }
     }
+}
+
+fun shareEvent(context: Context,eventData: AddEventData) {
+    val shareText = "Event Name : ${eventData.eventName}\nDescription : ${eventData.description}\nEvent Date : ${eventData.date}\nEvent Time : ${eventData.time}"
+
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, shareText)
+    }
+
+    context.startActivity(Intent.createChooser(intent, "Share Event via"))
 }

@@ -1,4 +1,4 @@
-package com.saikrishnapannela.eventreminder
+package eventreminder.by.s3302092saikrishnapannela
 
 import android.app.Activity
 import android.content.Context
@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,10 +62,14 @@ class UpcomingEventsActivity : ComponentActivity() {
 fun UpcomingEventsActivityScreen() {
     val context = LocalContext.current as Activity
 
-    val userEmail = EventReminderAppData.fetchUserMail(context)
+    val userEmail = EventReminderAppData.readMail(context)
 
     var upcomingEvents by remember { mutableStateOf(listOf<AddEventData>()) }
     var isLoading by remember { mutableStateOf(true) }
+
+    var ueCount by remember {
+        mutableIntStateOf(0)
+    }
 
     LaunchedEffect(userEmail) {
         getUpcomingEvents(userEmail) { orders ->
@@ -132,7 +137,8 @@ fun UpcomingEventsActivityScreen() {
                 Text(modifier = Modifier.fillMaxSize(), text = "Loading...")
             } else {
 
-                if(upcomingEvents.isNotEmpty()) {
+
+                if (upcomingEvents.isNotEmpty()) {
                     LazyColumn {
                         items(upcomingEvents.size) { bookedEvent ->
 
@@ -142,13 +148,18 @@ fun UpcomingEventsActivityScreen() {
                             )
 
                             if (eventStatusValue) {
+                                ueCount++
                                 ShowEventItem(upcomingEvents[bookedEvent])
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     }
-                }else{
-                    showEmptyContent()
+
+                    if (ueCount == 0) {
+                        ShowEmptyContent()
+                    }
+                } else {
+                    ShowEmptyContent()
                 }
             }
         }
@@ -197,6 +208,16 @@ fun ShowEventItem(eventData: AddEventData) {
                 style = MaterialTheme.typography.titleSmall.copy(
                     color = Color.Black,
                 )
+            )
+
+            Image(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable {
+                        shareEvent(context, eventData)
+                    },
+                painter = painterResource(id = R.drawable.ic_share),
+                contentDescription = "Share Icon"
             )
         }
 
@@ -510,7 +531,7 @@ fun ShowEventItem(eventData: AddEventData) {
 
 fun isTodayOrFuture(dateStr: String, timeStr: String): Boolean {
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-    dateFormat.isLenient = false // Ensures strict date parsing
+    dateFormat.isLenient = false
 
     return try {
         val inputDateTime = dateFormat.parse("$dateStr $timeStr") ?: return false
@@ -518,7 +539,7 @@ fun isTodayOrFuture(dateStr: String, timeStr: String): Boolean {
 
         inputDateTime >= currentDateTime
     } catch (e: Exception) {
-        false // Return false if parsing fails (invalid date or time format)
+        false
     }
 }
 
@@ -526,10 +547,8 @@ fun isTodayOrFuture(dateStr: String, timeStr: String): Boolean {
 fun getUpcomingEvents(userMailId: String, callback: (List<AddEventData>) -> Unit) {
 
     val emailKey = userMailId.replace(".", ",")
-
-    val databaseReference = FirebaseDatabase.getInstance().getReference("MyEvents/$emailKey")
-
-    databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+    val eventsDBReference = FirebaseDatabase.getInstance().getReference("MyEvents/$emailKey")
+    eventsDBReference.addListenerForSingleValueEvent(object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             val eventsList = mutableListOf<AddEventData>()
             for (eventSnapShot in snapshot.children) {
@@ -551,15 +570,12 @@ fun updateEventDetails(eventId: String, updatedData: Map<String, Any>, context: 
 
 
     try {
-        val emailKey = EventReminderAppData.fetchUserMail(context)
-            .replace(".", ",") // Convert email for Firebase key
-
+        val emailKey = EventReminderAppData.readMail(context)
+            .replace(".", ",")
         val path = "MyEvents/$emailKey/$eventId"
         Log.e("Test", "Patch Called : $path")
-        val databaseReference = FirebaseDatabase.getInstance().getReference(path)
-
-
-        databaseReference.updateChildren(updatedData)
+        val eventsDBReference = FirebaseDatabase.getInstance().getReference(path)
+        eventsDBReference.updateChildren(updatedData)
             .addOnSuccessListener {
                 Toast.makeText(
                     context,
@@ -583,7 +599,7 @@ fun updateEventDetails(eventId: String, updatedData: Map<String, Any>, context: 
 
 
 @Composable
-fun showEmptyContent() {
+fun ShowEmptyContent() {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally

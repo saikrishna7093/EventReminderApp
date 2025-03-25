@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "772805907873",
+    "firebase_url": "https://eventreminder-64174-default-rtdb.firebaseio.com",
     "project_id": "eventreminder-64174",
     "storage_bucket": "eventreminder-64174.firebasestorage.app"
   },
@@ -10,6 +11,25 @@
         "mobilesdk_app_id": "1:772805907873:android:68379624938899860a67e0",
         "android_client_info": {
           "package_name": "com.saikrishnapannela.eventreminder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXPNzQvlKwI-CPpsZpcdgRFGXrvDXqTxM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:772805907873:android:071dbe4653cd073d0a67e0",
+        "android_client_info": {
+          "package_name": "eventreminder.by.s3302092saikrishnapannela"
         }
       },
       "oauth_client": [],

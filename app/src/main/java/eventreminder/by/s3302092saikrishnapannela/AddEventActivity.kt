@@ -1,4 +1,4 @@
-package com.saikrishnapannela.eventreminder
+package eventreminder.by.s3302092saikrishnapannela
 
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -257,24 +257,6 @@ fun AddEventActivityScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-//            Text(
-//                modifier = Modifier,
-//                text = "Event Category",
-//                style = MaterialTheme.typography.titleMedium.copy(
-//                    color = Color.Red,
-//                )
-//            )
-//
-//            Spacer(modifier = Modifier.height(12.dp))
-
-//            OutlinedTextField(
-//                modifier = Modifier
-//                    .fillMaxWidth(),
-//                value = eventCategory,
-//                onValueChange = { eventCategory = it }
-//            )
-
-            //event Category DropDown
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -313,7 +295,6 @@ fun AddEventActivityScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Event Name Dropdown (Based on selected category)
                 Text(
                     "Select Event Name", style = MaterialTheme.typography.titleMedium.copy(
                         color = Color.Red,
@@ -347,7 +328,6 @@ fun AddEventActivityScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-//            DateTimePickerRow(dateState, timeState)
 
             Row(
                 modifier = Modifier
@@ -513,16 +493,12 @@ fun AddEventActivityScreen() {
 private fun AddEvent(eventData: AddEventData, activityContext: Context) {
 
     val fireDB = FirebaseDatabase.getInstance()
-    val databaseRef = fireDB.getReference("MyEvents")
-
+    val eventsDBReference = fireDB.getReference("MyEvents")
     val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
     val eventId = dateFormat.format(Date())
     eventData.eventId = eventId
-
-    val userEmail = EventReminderAppData.fetchUserMail(activityContext)
-
-
-    databaseRef.child(userEmail.replace(".", ",")).child(eventId).setValue(eventData)
+    val userEmail = EventReminderAppData.readMail(activityContext)
+    eventsDBReference.child(userEmail.replace(".", ",")).child(eventId).setValue(eventData)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(activityContext, "Event Added Successfully", Toast.LENGTH_SHORT)
@@ -552,13 +528,6 @@ fun AddEventActivityScreenPreview() {
     AddEventActivityScreen()
 }
 
-
-fun convertMillisToDateTime(millis: Long): String {
-    val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
-    sdf.timeZone = TimeZone.getDefault() // Ensure it matches your system timezone
-    return sdf.format(Date(millis))
-}
-
 fun scheduleNotification(context: Context, timeInMillis: Long, title: String, message: String) {
     NotificationScheduler.scheduleNotification(
         context = context,
@@ -566,6 +535,4 @@ fun scheduleNotification(context: Context, timeInMillis: Long, title: String, me
         message = message,
         timeInMillis = timeInMillis
     )
-//    Toast.makeText(context, "Notification Scheduled", Toast.LENGTH_LONG).show()
-
 }

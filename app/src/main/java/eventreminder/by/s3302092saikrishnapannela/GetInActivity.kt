@@ -1,4 +1,4 @@
-package com.saikrishnapannela.eventreminder
+package eventreminder.by.s3302092saikrishnapannela
 
 import android.app.Activity
 import android.content.Context
@@ -146,7 +146,6 @@ fun GetInScreen() {
                     .clickable {
                         when{
 
-
                             email.isBlank() -> {
                                 Toast.makeText(context, "We Need EmailId", Toast.LENGTH_SHORT)
                                     .show()
@@ -193,7 +192,7 @@ fun GetInScreen() {
             Text(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally),
-                text = "Never Booked a Show?",
+                text = "New to the app?",
                 style = MaterialTheme.typography.titleSmall.copy(
                     color = Color.Gray,
                 )
@@ -221,21 +220,15 @@ fun GetInScreen() {
 
 fun loginEventReminder(eventData: EventData, context: Context) {
 
+    val eventsDBReference = FirebaseDatabase.getInstance().getReference("EventReminderData").child(eventData.emailId.replace(".", ","))
 
-    val firebaseDatabase = FirebaseDatabase.getInstance()
-    val databaseReference = firebaseDatabase.getReference("EventReminderData").child(eventData.emailId.replace(".", ","))
-
-    databaseReference.get().addOnCompleteListener { task ->
+    eventsDBReference.get().addOnCompleteListener { task ->
         if (task.isSuccessful) {
             val userData = task.result?.getValue(EventData::class.java)
             if (userData != null) {
                 if (userData.password == eventData.password) {
-                    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    EventReminderAppData.persistLoginState(context, true)
-                    EventReminderAppData.persistUserMail(context, userData.emailId)
-                    EventReminderAppData.persistUserName(context, userData.userName)
-                    Toast.makeText(context, "Login Successfully", Toast.LENGTH_SHORT).show()
 
+                    saveUserData(userData,context)
                     context.startActivity(Intent(context, HomeActivity::class.java))
                     (context as Activity).finish()
                 } else {
@@ -255,6 +248,15 @@ fun loginEventReminder(eventData: EventData, context: Context) {
     }
 }
 
+fun saveUserData(userData: EventData, context: Context)
+{
+    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+    EventReminderAppData.writeLS(context, true)
+    EventReminderAppData.writeMail(context, userData.emailId)
+    EventReminderAppData.writeUserName(context, userData.userName)
+    EventReminderAppData.writeUserPhoto(context,userData.userProfilePhoto)
+
+}
 
 @Preview(showBackground = true)
 @Composable

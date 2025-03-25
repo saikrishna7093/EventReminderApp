@@ -1,4 +1,4 @@
-package com.saikrishnapannela.eventreminder
+package eventreminder.by.s3302092saikrishnapannela
 
 import android.app.Activity
 import android.content.Intent
@@ -33,7 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.saikrishnapannela.eventreminder.ui.theme.EventReminderTheme
+import eventreminder.by.s3302092saikrishnapannela.ui.theme.EventReminderTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -65,7 +65,6 @@ fun EventLaunch() {
 
     if (showSplash) {
         EventEntry()
-
     } else {
         checkStatusAndNavigate(context)
     }
@@ -74,7 +73,7 @@ fun EventLaunch() {
 
 fun checkStatusAndNavigate(context: Activity)
 {
-    val currentStatus = EventReminderAppData.fetchLoginState(context)
+    val currentStatus = EventReminderAppData.readLS(context)
 
     if(currentStatus)
     {

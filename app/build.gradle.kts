@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.saikrishnapannela.eventreminder"
+    namespace = "eventreminder.by.s3302092saikrishnapannela"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.saikrishnapannela.eventreminder"
+        applicationId = "eventreminder.by.s3302092saikrishnapannela"
         minSdk = 25
         targetSdk = 35
         versionCode = 1
